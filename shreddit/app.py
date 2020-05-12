@@ -1,12 +1,12 @@
 """This module contains script entrypoints for shreddit.
 """
 import argparse
-import yaml
-import logging
 import os
+
 import pkg_resources
+import yaml
 from appdirs import user_config_dir
-from shreddit import default_config
+
 from shreddit.shredder import Shredder
 
 
@@ -43,12 +43,11 @@ def main():
         return
 
     with open(config_filename) as fh:
-        # Not doing a simple update() here because it's preferable to only set attributes that are "whitelisted" as
-        # configuration options in the form of default values.
         user_config = yaml.safe_load(fh)
-        for option in default_config:
-            if option in user_config:
-                default_config[option] = user_config[option]
+        default_config = {}
+        for option, value in user_config.items():
+            if "_" + option in Shredder.__dict__:
+                default_config[option] = value
 
     shredder = Shredder(default_config, args.user)
     shredder.shred()
